@@ -1,0 +1,134 @@
+import requests
+"""
+def send_message(chat_id, text):
+    url = "https://api.telegram.org/bot634255068:AAHcvSajWyzYFbaa99ca5e7SQQ8qSelzlJE/sendMessage"
+    data = {
+        "chat_id": chat_id,
+        "text": text
+    }
+    r = requests.post(url, data = data)
+    print(r.json())
+
+send_message(event["message"]["from"]["id"], event["message"]["text"])
+"""
+event = {'update_id': 593963366, 'message': {'message_id': 1406, 'from': {'id': 485951987, 'is_bot': False, 'first_name': 'Shalamov', 'last_name': 'Ivan', 'username': 'ShalamovIvan', 'language_code': 'ru'}, 'chat': {'id': 485951987, 'first_name': 'Shalamov', 'last_name': 'Ivan', 'username': 'ShalamovIvan', 'type': 'private'}, 'date': 1550672638, 'text': '1'}}
+event["message"]["text"] = str(input())
+
+userids = str("")
+userdict = {}
+usermas =[]
+def make_userdict():
+    global userids, userdict, usermas
+    use = open('user.txt')
+    usermas = use.readlines();
+    i = int(0)
+    while (i < len(usermas)) :
+        us = usermas[i].strip()
+        s = us.split(' ')
+        usermas[i] = usermas[i].split(' ')
+        usermas[i][0] = usermas[i][0].strip()
+        usermas[i][1] = usermas[i][1].strip()
+        usermas[i][2] = usermas[i][2].strip()
+        i += 1
+        userids = userids + ' ' + s[0]
+        userids.strip()
+        userdict[s[0]] = s
+        
+    use.close()
+        
+s = []
+
+def make_s():
+    global userids, userdict, s
+    if (userids.find(str(event["message"]["from"]["id"])) == -1):
+        use = open('user.txt' , 'a')
+        s = [str(event["message"]["from"]["id"]), 'none' , 'none']
+        userdict[s[0]] = s
+        us = s[0] + ' ' + s[1] + ' ' + s[2]
+        use.write(us + '\n')
+        use.close()
+    else:
+        s = userdict[str(event["message"]["from"]["id"])]
+
+count = ''
+def make_count():
+    global count
+    c = open('texts\count.txt')
+    count = str(c.readline())
+
+scenario = {}
+def make_scenario(namefile):
+    global scenario
+    f = open('texts\\' + namefile + 'text.txt')
+    text = f.readlines()
+    i = int(0)
+    while (i < len(text)) :
+        num = text[i].strip()
+        num = '\n'.join(num.split('\\n'))
+        i += 1
+        ask = text[i].strip()
+        ask = '\n'.join(ask.split('\\n'))
+        i += 1
+        first = text[i].strip()
+        first = '\n'.join(first.split('\\n'))
+        i += 1
+        second = text[i].strip()
+        second = '\n'.join(second.split('\\n'))
+        i += 1
+        num = '\n'.join(num.split('\\n'))
+        scenario[num] = [str(ask), str(first), str(second)]
+    f.close()
+
+namefile = ''
+def make_namefile(newinput):
+    global namefile, s, count
+    intpr = bool(True)
+    ints = str('0123456789')
+    for i in range(0,len(newinput)):
+        if (ints.find(newinput[i]) == -1):
+            intpr = False
+            break
+    if (len(newinput) == 0):
+        intpr = False
+    if (intpr):
+        if (int(newinput) >= 1 and int(newinput) <= int(count)):
+            #send_message(int(s[0]), 'Выбор сделан')
+            print('Выбор сделан')
+            s[1] = newinput
+            namefile = newinput
+        else:
+            #send_message(int(s[0]), 'Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+            print('Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+            s[1] = 'create'
+    else:
+        #send_message(int(s[0]), 'Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+        print('Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+        s[1] = 'create'
+        
+def update_user():
+    global s,usermas
+    user = open('user.txt' , 'w')
+    for i in range(0,len(usermas)):
+        if (s[0] == usermas[i][0]):
+            us = s[0] + ' ' + s[1] + ' ' + s[2]
+            user.write(us + '\n')
+        else:
+            us = usermas[i][0] + ' ' + usermas[i][1] + ' ' + usermas[i][2]
+            user.write(us + '\n')
+    user.close()
+"""
+типа мейн
+global userids, userdict, s, count, namefile, scenario
+"""
+make_userdict()
+make_s()
+make_count()
+if (s[1] == 'none'):
+    #send_message(int(s[0]), 'Выберите квест вводом числа от 1 до ' + count)
+    print('Выберите квест вводом числа от 1 до ' + count)
+    s[1] = 'create'
+    update_user()
+else:
+    if (s[1] == 'create'):
+        make_namefile(event["message"]["text"])
+        update_user()
