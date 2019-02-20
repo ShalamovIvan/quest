@@ -12,6 +12,7 @@ def send_message(chat_id, text):
 send_message(event["message"]["from"]["id"], event["message"]["text"])
 """
 event = {'update_id': 593963366, 'message': {'message_id': 1406, 'from': {'id': 485951987, 'is_bot': False, 'first_name': 'Shalamov', 'last_name': 'Ivan', 'username': 'ShalamovIvan', 'language_code': 'ru'}, 'chat': {'id': 485951987, 'first_name': 'Shalamov', 'last_name': 'Ivan', 'username': 'ShalamovIvan', 'type': 'private'}, 'date': 1550672638, 'text': '1'}}
+event["message"]["from"]["id"] = input()
 event["message"]["text"] = str(input())
 
 userids = str("")
@@ -22,7 +23,7 @@ def make_userdict():
     use = open('user.txt')
     usermas = use.readlines();
     i = int(0)
-    while (i < len(usermas)) :
+    while (i < len(usermas)):
         us = usermas[i].strip()
         s = us.split(' ')
         usermas[i] = usermas[i].split(' ')
@@ -39,10 +40,11 @@ def make_userdict():
 s = []
 
 def make_s():
-    global userids, userdict, s
+    global userids, userdict, s, usermas
     if (userids.find(str(event["message"]["from"]["id"])) == -1):
         use = open('user.txt' , 'a')
         s = [str(event["message"]["from"]["id"]), 'none' , 'none']
+        usermas.append(s)
         userdict[s[0]] = s
         us = s[0] + ' ' + s[1] + ' ' + s[2]
         use.write(us + '\n')
@@ -123,6 +125,7 @@ global userids, userdict, s, count, namefile, scenario
 make_userdict()
 make_s()
 make_count()
+update_user()
 if (s[1] == 'none'):
     #send_message(int(s[0]), 'Выберите квест вводом числа от 1 до ' + count)
     print('Выберите квест вводом числа от 1 до ' + count)
