@@ -75,7 +75,7 @@ def restart():
 
 def make_userdict():
     global userids, userdict, usermas
-    use = open('user.txt')
+    use = open('texts/user.txt')
     usermas = use.readlines();
     i = int(0)
     while (i < len(usermas)):
@@ -97,7 +97,7 @@ s = []
 def make_s(event):
     global userids, userdict, s, usermas
     if (userids.find(str(event["message"]["from"]["id"])) == -1):
-        use = open('user.txt' , 'a')
+        use = open('texts/user.txt' , 'a')
         s = [str(event["message"]["from"]["id"]), 'none' , 'none']
         usermas.append(s)
         userdict[s[0]] = s
@@ -110,13 +110,14 @@ def make_s(event):
 count = ''
 def make_count():
     global count
-    c = open('texts\count.txt')
+    c = open('texts/count.txt')
     count = str(c.readline())
+    c.close()
 
 scenario = {}
 def make_scenario(name_file):
     global scenario
-    f = open('texts\\' + name_file + 'text.txt')
+    f = open('texts/' + name_file + 'text.txt')
     text = f.readlines()
     i = int(0)
     while (i < len(text)) :
@@ -166,7 +167,7 @@ def make_namefile(newinput):
         
 def update_user():
     global s,usermas
-    user = open('user.txt' , 'w')
+    user = open('texts/user.txt' , 'w')
     for i in range(0,len(usermas)):
         if (s[0] == usermas[i][0]):
             us = s[0] + ' ' + s[1] + ' ' + s[2]
