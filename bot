@@ -1,5 +1,4 @@
-import requests
-"""
+import requests, json
 def send_message(chat_id, text):
     url = "https://api.telegram.org/bot634255068:AAHcvSajWyzYFbaa99ca5e7SQQ8qSelzlJE/sendMessage"
     data = {
@@ -9,15 +8,71 @@ def send_message(chat_id, text):
     r = requests.post(url, data = data)
     print(r.json())
 
-send_message(event["message"]["from"]["id"], event["message"]["text"])
-"""
-event = {'update_id': 593963366, 'message': {'message_id': 1406, 'from': {'id': 485951987, 'is_bot': False, 'first_name': 'Shalamov', 'last_name': 'Ivan', 'username': 'ShalamovIvan', 'language_code': 'ru'}, 'chat': {'id': 485951987, 'first_name': 'Shalamov', 'last_name': 'Ivan', 'username': 'ShalamovIvan', 'type': 'private'}, 'date': 1550672638, 'text': '1'}}
-event["message"]["from"]["id"] = input()
-event["message"]["text"] = str(input())
 
+def reply_keyboard(chat_id):
+    reply_keyboard_markup = {"keyboard":[["1", "2"]],"resize_keyboard":True}
+    data = {
+        'chat_id': chat_id,
+        'text': "Сделайте выбор", 
+        'reply_markup': json.dumps(reply_keyboard_markup)
+    }
+    url = "https://api.telegram.org/bot634255068:AAHcvSajWyzYFbaa99ca5e7SQQ8qSelzlJE/sendMessage"
+    r = requests.get(url, data = data)
+    print(r.json())
+    
 userids = str("")
 userdict = {}
 usermas =[]
+
+func = True
+def func(text):
+    global func
+    if (text[0] == '/'):
+        if (text == '/help'):
+            print_help()
+        else:
+            if (text == '/back'):
+                back()
+            else:
+                if (text == '/restart'):
+                    restart()
+                else:
+                    if (text != '/start'):
+                        send_message(int(s[0]), 'Я не знаю такой команды')
+                        #print('Я не знаю такой команды')
+        func = False
+
+def print_help():
+    global count
+    send_message(int(s[0]), 'Первым делом выберете квест вводом числа от 1 до ' + count + '.\nЕсли вы уже выбрали квест и начали игру, выбирайте вариант ответа нажатием на кнопки с соответствующими номерами')
+    #print('Первым делом выберете квест вводом числа от 1 до ' + count + '.\nЕсли вы уже выбрали квест и начали игру, выбирайте вариант ответа нажатием на кнопки с соответствующими номерами')
+
+def back():
+    if (s[2] != 'none' and len(s[2])>1):  
+        make_scenario(s[1])
+        send_message(int(s[0]), 'Возвращение на предыдущий уровень')
+        print('Возвращение на предыдущий уровень')        
+        send_message(int(s[0]), scenario[s[2]][0])
+        send_message(int(s[0]), scenario[s[2]][1])
+        send_message(int(s[0]), scenario[s[2]][2])
+        reply_keyboard(int(s[0]))
+        #print(scenario[s[2][0:len(s[2])-1]][0])
+        #print(scenario[s[2][0:len(s[2])-1]][1])
+        #print(scenario[s[2][0:len(s[2])-1]][2])
+        s[2] = s[2][0:len(s[2])-1]
+        update_user()
+    else:
+        send_message(int(s[0]), 'Возвращение сейчас невозможно')
+        #print('Возвращение сейчас невозможно')
+
+def restart():
+    global count
+    s[1] = 'create'
+    s[2] = 'none'
+    send_message(int(s[0]), 'Выберите квест вводом числа от 1 до ' + count)
+    #print('Выберите квест вводом числа от 1 до ' + count)
+    update_user()
+
 def make_userdict():
     global userids, userdict, usermas
     use = open('user.txt')
@@ -59,9 +114,9 @@ def make_count():
     count = str(c.readline())
 
 scenario = {}
-def make_scenario(namefile):
+def make_scenario(name_file):
     global scenario
-    f = open('texts\\' + namefile + 'text.txt')
+    f = open('texts\\' + name_file + 'text.txt')
     text = f.readlines()
     i = int(0)
     while (i < len(text)) :
@@ -94,17 +149,19 @@ def make_namefile(newinput):
         intpr = False
     if (intpr):
         if (int(newinput) >= 1 and int(newinput) <= int(count)):
-            #send_message(int(s[0]), 'Выбор сделан')
-            print('Выбор сделан')
+            send_message(int(s[0]), 'Выбор сделан')
+            #print('Выбор сделан')
             s[1] = newinput
             namefile = newinput
         else:
-            #send_message(int(s[0]), 'Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
-            print('Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+            send_message(int(s[0]), 'Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+            #print('Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+            reply_keyboard(int(s[0]))
             s[1] = 'create'
     else:
-        #send_message(int(s[0]), 'Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
-        print('Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+        send_message(int(s[0]), 'Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+        #print('Ввод неверен\nВыберите квест вводом числа от 1 до ' + count)
+        reply_keyboard(int(s[0]))
         s[1] = 'create'
         
 def update_user():
@@ -118,20 +175,63 @@ def update_user():
             us = usermas[i][0] + ' ' + usermas[i][1] + ' ' + usermas[i][2]
             user.write(us + '\n')
     user.close()
-"""
-типа мейн
-global userids, userdict, s, count, namefile, scenario
-"""
-make_userdict()
-make_s()
-make_count()
-update_user()
-if (s[1] == 'none'):
-    #send_message(int(s[0]), 'Выберите квест вводом числа от 1 до ' + count)
-    print('Выберите квест вводом числа от 1 до ' + count)
-    s[1] = 'create'
+check = True
+def check(text):
+    global s, check
+    if (text == '1'):
+        s[2] = s[2] + '0'
+    else:
+        if (text == '2'):
+            s[2] = s[2] + '1'
+        else:
+            send_message(int(s[0]), 'Ввод неверен\nВыберете вариант ответа введя 1 для первого, и 2 для второго')
+            #print('Ввод неверен\nВыберете вариант ответа введя 1 для первого, и 2 для второго')
+            reply_keyboard(int(s[0]))
+            check = False
+            
+
+def point(event,context):
+    global userids, userdict, s, count, namefile, scenario, func, check
+    make_userdict()
+    make_s()
+    make_count()
     update_user()
-else:
-    if (s[1] == 'create'):
-        make_namefile(event["message"]["text"])
-        update_user()
+    func(event["message"]["text"])
+    if (func):
+        if (s[1] == 'none'):
+            send_message(int(s[0]), 'Выберите квест вводом числа от 1 до ' + count)
+            #print('Выберите квест вводом числа от 1 до ' + count)
+            reply_keyboard(int(s[0]))
+            s[1] = 'create'
+            update_user()
+        else:
+            if (s[1] == 'create'):
+                make_namefile(event["message"]["text"])
+                if (s[1] != 'create'):
+                    s[2] = '0'
+                    make_scenario(namefile)
+                    send_message(int(s[0]), scenario[s[2]][0])
+                    send_message(int(s[0]), scenario[s[2]][1])
+                    send_message(int(s[0]), scenario[s[2]][2])
+                    reply_keyboard(int(s[0]))
+                    #print(scenario[s[2]][0])
+                    #print(scenario[s[2]][1])
+                    #print(scenario[s[2]][2])
+                update_user()
+            else:
+                check(event["message"]["text"])
+                if (check):
+                    make_scenario(str(s[1]))
+                    if (scenario[s[2]][0].find('конец игры') == -1):
+                        send_message(int(s[0]), scenario[s[2]][0])
+                        send_message(int(s[0]), scenario[s[2]][1])
+                        send_message(int(s[0]), scenario[s[2]][2])
+                        reply_keyboard(int(s[0]))
+                        #print(scenario[s[2]][0])
+                        #print(scenario[s[2]][1])
+                        #print(scenario[s[2]][2])
+                        update_user()
+                    else:
+                        send_message(int(s[0]), scenario[s[2]][0])
+                        #print(scenario[s[2]][0])
+                        restart()
