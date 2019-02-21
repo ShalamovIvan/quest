@@ -94,7 +94,7 @@ def make_userdict():
         
 s = []
 
-def make_s():
+def make_s(event):
     global userids, userdict, s, usermas
     if (userids.find(str(event["message"]["from"]["id"])) == -1):
         use = open('user.txt' , 'a')
@@ -193,7 +193,7 @@ def check(text):
 def point(event,context):
     global userids, userdict, s, count, namefile, scenario, func, check
     make_userdict()
-    make_s()
+    make_s(event)
     make_count()
     update_user()
     func(event["message"]["text"])
