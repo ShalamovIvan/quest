@@ -1,0 +1,20 @@
+def point(event,context):
+    global userids, userdict, s, count, namefile, scenario, func, check
+    r = int(random.randint(1,2))
+    if (event["message"]["text"] == 'Касьянов' or event["message"]["text"] == 'Шалагин'):
+        send_message(event["message"]["from"]["id"], 'ЛОХ')
+    else:
+        if (event["message"]["text"] == 'Easter egg'):
+            send_message(event["message"]["from"]["id"], '🥚🥚🥚')
+        else:
+            if (str(r) == event["message"]["text"]):
+                send_message(event["message"]["from"]["id"], 'Вы угадали 😄')
+            else:
+                if (event["message"]["text"] == 'Этот бот фигня'):
+                    send_message(event["message"]["from"]["id"], 'Обидно 😡')
+                else:
+                    if (event["message"]["text"] == 'Ты самый лучший бот'):
+                        send_message(event["message"]["from"]["id"], '🥰')
+                    else:
+                        send_message(event["message"]["from"]["id"], 'Вы не угадали 😢 Я загадал ' + str(r))
+    reply_keyboard(event["message"]["from"]["id"])
