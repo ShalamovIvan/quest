@@ -1,4 +1,6 @@
-import requests, json
+import requests, json, random, boto3
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('data')
 def send_message(chat_id, text):
     url = "https://api.telegram.org/bot634255068:AAHcvSajWyzYFbaa99ca5e7SQQ8qSelzlJE/sendMessage"
     data = {
@@ -20,13 +22,11 @@ def reply_keyboard(chat_id):
     r = requests.get(url, data = data)
     print(r.json())
     
-userids = str("")
-userdict = {}
-usermas =[]
 
-func = True
+funct = True
+
 def func(text):
-    global func
+    global funct
     if (text[0] == '/'):
         if (text == '/help'):
             print_help()
@@ -40,7 +40,7 @@ def func(text):
                     if (text != '/start'):
                         send_message(int(s[0]), 'Я не знаю такой команды')
                         #print('Я не знаю такой команды')
-        func = False
+        funct = False
 
 def print_help():
     global count
@@ -73,39 +73,20 @@ def restart():
     #print('Выберите квест вводом числа от 1 до ' + count)
     update_user()
 
-def make_userdict():
-    global userids, userdict, usermas
-    use = open('texts/user.txt')
-    usermas = use.readlines();
-    i = int(0)
-    while (i < len(usermas)):
-        us = usermas[i].strip()
-        s = us.split(' ')
-        usermas[i] = usermas[i].split(' ')
-        usermas[i][0] = usermas[i][0].strip()
-        usermas[i][1] = usermas[i][1].strip()
-        usermas[i][2] = usermas[i][2].strip()
-        i += 1
-        userids = userids + ' ' + s[0]
-        userids.strip()
-        userdict[s[0]] = s
-        
-    use.close()
         
 s = []
 
 def make_s(event):
-    global userids, userdict, s, usermas
-    if (userids.find(str(event["message"]["from"]["id"])) == -1):
-        use = open('texts/user.txt' , 'a')
-        s = [str(event["message"]["from"]["id"]), 'none' , 'none']
-        usermas.append(s)
-        userdict[s[0]] = s
-        us = s[0] + ' ' + s[1] + ' ' + s[2]
-        use.write(us + '\n')
-        use.close()
+    global s
+    gb = table.get_item(
+        Key = {
+            'name' : str(event["message"]["from"]["id"])
+        }    
+    )
+    if (len(gb) == 2):
+        s = [str(gb['Item']['name']), str(gb['Item']['id']), str(gb['Item']['t'])]
     else:
-        s = userdict[str(event["message"]["from"]["id"])]
+        s = [str(event["message"]["from"]["id"]), 'none', 'none']
 
 count = ''
 def make_count():
@@ -166,18 +147,19 @@ def make_namefile(newinput):
         s[1] = 'create'
         
 def update_user():
-    global s,usermas
-    user = open('texts/user.txt' , 'w')
-    for i in range(0,len(usermas)):
-        if (s[0] == usermas[i][0]):
-            us = s[0] + ' ' + s[1] + ' ' + s[2]
-            user.write(us + '\n')
-        else:
-            us = usermas[i][0] + ' ' + usermas[i][1] + ' ' + usermas[i][2]
-            user.write(us + '\n')
-    user.close()
+    global s, nameus
+    table.put_item(
+        Item = {
+            'name' : s[0],
+            'id' : s[1],
+            't' : s[2],
+            'nick' : nameus
+        }
+    )
+
 check = True
-def check(text):
+
+def checka(text):
     global s, check
     if (text == '1'):
         s[2] = s[2] + '0'
@@ -190,15 +172,17 @@ def check(text):
             reply_keyboard(int(s[0]))
             check = False
             
-
+nameus = ''
 def point(event,context):
-    global userids, userdict, s, count, namefile, scenario, func, check
-    make_userdict()
+    global s, count, namefile, scenario, funct, check, nameus
+    nameus = event["message"]["from"]["username"]
     make_s(event)
     make_count()
-    update_user()
+    funct = True
     func(event["message"]["text"])
-    if (func):
+    if (event["message"]["text"] == '/start'):
+        funct = True
+    if (funct):
         if (s[1] == 'none'):
             send_message(int(s[0]), 'Выберите квест вводом числа от 1 до ' + count)
             #print('Выберите квест вводом числа от 1 до ' + count)
@@ -220,7 +204,7 @@ def point(event,context):
                     #print(scenario[s[2]][2])
                 update_user()
             else:
-                check(event["message"]["text"])
+                checka(event["message"]["text"])
                 if (check):
                     make_scenario(str(s[1]))
                     if (scenario[s[2]][0].find('конец игры') == -1):
